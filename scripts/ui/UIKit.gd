@@ -30,8 +30,15 @@ const FONT_TITLE := preload("res://assets/fonts/Silkscreen-Bold.ttf")
 # Jersey 10 runs small for its point size, so body text sizes are scaled up to match the layout.
 const BODY_SCALE := 1.3
 
+## Phones get larger small text (sizes under 22 move halfway towards 22); desktop is unchanged.
+## QUIETUS_MOBILE_TEXT=1 previews this on desktop.
+static var mobile_text := OS.has_feature("mobile") or OS.get_environment("QUIETUS_MOBILE_TEXT") == "1"
+
 static func fs(size: int) -> int:
-	return int(round(size * BODY_SCALE))
+	var s := float(size)
+	if mobile_text and size < 22:
+		s = 22.0 - (22.0 - size) / 2.0
+	return int(round(s * BODY_SCALE))
 
 static func _pixel_font(base: Font, embolden: float) -> FontVariation:
 	var f := FontVariation.new()

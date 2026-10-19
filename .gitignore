@@ -5,3 +5,5 @@
 *.tmp
 # Local test harness scratch files
 tests/_*
+# Export output
+/build/

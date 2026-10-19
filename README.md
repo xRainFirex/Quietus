@@ -31,6 +31,7 @@ The prologue plays on your first run, and you can re-read it from **The Story** 
 - **Six starting decks** to unlock, each with its own cards and perk.
 - **12 events**, half of them built around trick cards.
 - **Lifetime stats** for every deck: runs, wins, losses, best floor and battles won.
+- **Plays on desktop and Android:** mouse, keyboard or touch.
 
 ## How to play
 
@@ -55,16 +56,18 @@ If the opponent empties their hand first, you take damage for every card left in
 
 ### Controls
 
-| Action | Mouse | Keyboard |
-| --- | --- | --- |
-| Play a card | Click it | |
-| Draw a card | Click your deck | `Space` |
-| Call QUIET! | QUIET! button | `Q` |
-| Pass after drawing | PASS button | `Enter` |
-| Catch the opponent | CATCH! button | `C` |
-| Pause | MENU button | `Esc` |
+| Action | Mouse | Keyboard | Touch |
+| --- | --- | --- | --- |
+| Play a card | Click it | | Tap it |
+| Draw a card | Click your deck | `Space` | Tap your deck |
+| Call QUIET! | QUIET! button | `Q` | QUIET! button |
+| Pass after drawing | PASS button | `Enter` | PASS button |
+| Catch the opponent | CATCH! button | `C` | CATCH! button |
+| See what something does | Hover over it | | Press and hold it |
+| Scroll the map | Mouse wheel | | Drag |
+| Pause | MENU button | `Esc` | MENU or the Back button |
 
-Hover over any card or charm to see what it does.
+On touch screens, a tap counts when you lift your finger. Holding or dragging cancels it, so you can check a card's description without playing it.
 
 ## Starting decks
 
@@ -148,7 +151,7 @@ The project uses the **Compatibility** renderer, so it runs on almost any graphi
 Use **Project → Export** in Godot. You'll need the export templates (**Editor → Manage Export Templates**) for your target platform.
 
 - **Windows, macOS, Linux:** add a preset for the platform and export.
-- **Android:** you also need JDK 17, the Android SDK and a debug keystore, set in **Editor Settings → Export → Android**. See Godot's [Exporting for Android](https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_android.html) guide. Taps work as clicks, but card and charm descriptions currently rely on mouse hover, so the game isn't fully touch-friendly yet.
+- **Android:** the project includes an **Android** preset (landscape, full screen, arm64 and armv7, package `com.xrainfirex.quietus`) that exports to `build/Quietus.apk`. You also need JDK 17, the Android SDK and a debug keystore, set in **Editor Settings → Export → Android**. See Godot's [Exporting for Android](https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_android.html) guide. On phones and tablets, small text is drawn larger. To preview that on desktop, run the game with `QUIETUS_MOBILE_TEXT=1`.
 
 ### Save data
 
@@ -174,7 +177,7 @@ The test plays hundreds of AI-vs-AI battles and checks that:
 
 ```
 scenes/Main.tscn       root scene
-scripts/autoload/      RunState (run and lifetime state), Sfx (synthesised sounds)
+scripts/autoload/      RunState (run and lifetime state), Sfx (synthesised sounds), Touch (touch input)
 scripts/core/          rules and data: CardData, CardFactory, BattleState, EnemyAI, Enemies,
                        Charms, MapGen, StarterDecks, Story
 scripts/ui/            UIKit (theme and palette), PixelCanvas, PixelCard, CardView, Glyph,

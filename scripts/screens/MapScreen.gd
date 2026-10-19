@@ -49,6 +49,9 @@ func _ready() -> void:
 	_scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_scroll.offset_top = Hud.HEIGHT
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	# On phones the map scrolls by dragging (handled in _input), so the container itself ignores touches.
+	if Touch.drag_scroll:
+		_scroll.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_scroll)
 	_content = Control.new()
 	_content.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -91,6 +94,10 @@ func _ready() -> void:
 	resized.connect(_layout)
 	_layout.call_deferred()
 	_scroll_to_current.call_deferred()
+
+func _input(event: InputEvent) -> void:
+	if Touch.drag_scroll and event is InputEventScreenDrag and not (router != null and router.has_overlay()):
+		_scroll.scroll_vertical = int(_scroll.scroll_vertical - event.relative.y)
 
 func _state_of(n: Dictionary) -> String:
 	if n.id == RunState.current_node:
@@ -189,7 +196,7 @@ class MapNodeView extends Control:
 		mouse_exited.connect(func(): _hover = false)
 
 	func _gui_input(event: InputEvent) -> void:
-		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		if Touch.is_tap(event) and Rect2(Vector2.ZERO, size).has_point(event.position):
 			pressed.emit(node.id)
 
 	func _process(delta: float) -> void:
