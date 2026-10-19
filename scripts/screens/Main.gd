@@ -31,6 +31,9 @@ var _pause: Control
 var _busy := false
 
 func _ready() -> void:
+	# The Android back button is handled in _notification instead of closing the app.
+	get_tree().quit_on_go_back = false
+	add_to_group("router")
 	theme = UIKit.build_theme()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	# Crisp pixel art everywhere: every texture is scaled with nearest-neighbour filtering.
@@ -219,6 +222,38 @@ func open_deck(title_text: String, cards: Array, selectable: bool = false, subti
 
 func has_overlay() -> bool:
 	return _overlay.get_child_count() > 0
+
+# touch_info_at
+# DESCRIPTION: Lets the active screen supply press-and-hold text (see Touch).
+func touch_info_at(pos: Vector2) -> String:
+	if _current != null and _current.has_method("touch_info_at") and not has_overlay():
+		return _current.touch_info_at(pos)
+	return ""
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_on_back()
+
+# _on_back
+# DESCRIPTION: Android back button. On the title screen it closes an open panel or quits; outside a run
+#              it returns to the title; in a run it acts like Esc (closes the deck viewer or toggles pause).
+func _on_back() -> void:
+	if _busy:
+		return
+	# Main doesn't get input while paused, so the pause menu is closed directly.
+	if _pause != null:
+		toggle_pause()
+	elif _current is TitleScreen:
+		if not _current.close_modal():
+			get_tree().quit()
+	elif not RunState.in_run:
+		show_title()
+	else:
+		for pressed in [true, false]:
+			var ev := InputEventAction.new()
+			ev.action = "ui_cancel"
+			ev.pressed = pressed
+			Input.parse_input_event(ev)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel") and RunState.in_run and _hud.visible:

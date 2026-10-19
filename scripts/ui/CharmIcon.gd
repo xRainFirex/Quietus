@@ -27,7 +27,7 @@ func _ready() -> void:
 		queue_redraw())
 
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	if Touch.is_tap(event) and Rect2(Vector2.ZERO, size).has_point(event.position):
 		clicked.emit(charm_id)
 
 func _draw() -> void:

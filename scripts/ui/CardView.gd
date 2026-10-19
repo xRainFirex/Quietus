@@ -74,7 +74,7 @@ func _ready() -> void:
 			hovered = false)
 
 func _gui_input(event: InputEvent) -> void:
-	if interactive and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	if interactive and Touch.is_tap(event) and Rect2(Vector2.ZERO, size).has_point(event.position):
 		clicked.emit(self)
 		accept_event()
 

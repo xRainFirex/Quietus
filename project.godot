@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 
 RunState="*res://scripts/autoload/RunState.gd"
 Sfx="*res://scripts/autoload/Sfx.gd"
+Touch="*res://scripts/autoload/Touch.gd"
 
 [display]
 
@@ -29,6 +30,7 @@ window/size/window_width_override=1600
 window/size/window_height_override=900
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+window/handheld/orientation=4
 
 [gui]
 

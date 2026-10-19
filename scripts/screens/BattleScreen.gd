@@ -46,6 +46,7 @@ var _modal := false
 var _finished := false
 var _catch_open := false
 var _hovered: CardView
+var _touch_card: CardView
 var _bonus_turn := false
 var _time := 0.0
 
@@ -514,7 +515,24 @@ func _process(delta: float) -> void:
 # ---------- Input ----------
 
 func _card_under_mouse() -> CardView:
-	var m := get_local_mouse_position()
+	return _hand_card_at(get_local_mouse_position())
+
+# touch_info_at
+# DESCRIPTION: Press-and-hold text for touch screens: the hand card or top pile card under a point.
+func touch_info_at(pos: Vector2) -> String:
+	if _blocked():
+		return ""
+	var local := pos - global_position
+	var v := _hand_card_at(local)
+	if v == null and not _pile_views.is_empty():
+		var top: CardView = _pile_views[-1]
+		if top != null and is_instance_valid(top) and top.get_global_rect().has_point(pos):
+			v = top
+	if v == null or v.data == null:
+		return ""
+	return "%s\n%s" % [v.data.title(), v.data.describe()]
+
+func _hand_card_at(m: Vector2) -> CardView:
 	var list: Array = _hand_views[P]
 	for i in range(list.size() - 1, -1, -1):
 		var v: CardView = list[i]
@@ -546,8 +564,15 @@ func _blocked() -> bool:
 func _unhandled_input(event: InputEvent) -> void:
 	if _blocked():
 		return
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	# A touch lifts the card under the finger and spreads the hand, so remember the card from the press.
+	# Touches don't move the mouse position, so they are located by the event's own position.
+	if event is InputEventMouseButton and event.pressed and event.device == InputEvent.DEVICE_ID_EMULATION:
+		_touch_card = _hand_card_at(make_input_local(event).position)
+	if Touch.is_tap(event):
 		var v := _card_under_mouse()
+		if event.device == InputEvent.DEVICE_ID_EMULATION:
+			v = _touch_card
+			_touch_card = null
 		if v != null:
 			get_viewport().set_input_as_handled()
 			_try_play(v)

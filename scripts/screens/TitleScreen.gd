@@ -9,6 +9,7 @@ extends Control
 var router: Node
 var _floaters: Array[CardView] = []
 var _time := 0.0
+var _modal: Control
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -54,7 +55,9 @@ func _ready() -> void:
 	how.pressed.connect(_show_how_to_play)
 	buttons.add_child(how)
 	var story := UIKit.button("THE STORY")
-	story.pressed.connect(func(): add_child(Story.panel("CLOSE", func(): pass)))
+	story.pressed.connect(func():
+		_modal = Story.panel("CLOSE", func(): pass)
+		add_child(_modal))
 	buttons.add_child(story)
 	var quit := UIKit.button("QUIT", "GhostButton")
 	quit.pressed.connect(func(): get_tree().quit())
@@ -80,6 +83,19 @@ func _process(delta: float) -> void:
 		v.rotation = off * 0.2 + sin(_time * 0.7 + i) * 0.03
 		v.position = center + Vector2(off * 120.0, absf(off) * 26.0 + bob) - v.size / 2.0
 
+# close_modal
+# DESCRIPTION: Closes How to Play or The Story if one is open. Returns whether anything was closed.
+func close_modal() -> bool:
+	if _modal != null and is_instance_valid(_modal) and not _modal.is_queued_for_deletion():
+		_modal.queue_free()
+		_modal = null
+		return true
+	return false
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel") and close_modal():
+		get_viewport().set_input_as_handled()
+
 func _show_how_to_play() -> void:
 	var layer := Control.new()
 	layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -104,7 +120,7 @@ func _show_how_to_play() -> void:
 [b][color=#f5c542]Losing hurts[/color][/b]  Lose a battle and you take damage for every card left in your hand, then face the same opponent again. You can't move on until you win. Reach 0 HP and the run is over.
 [b][color=#f5c542]The run[/color][/b]  Choose your path through three acts: battles, elites, shops, campfires, treasure and strange events. Beat each act's boss to move on.
 [b][color=#f5c542]Build your deck[/color][/b]  Win new cards, buy [b]charms[/b] (passive powers), remove weak cards and [b]enchant[/b] cards (Gilded, Barbed, Healing).
-[b][color=#f5c542]Trick cards[/color][/b]  [b]Discard All[/b], [b]Wild Swap[/b], dual-colour numbers, [b]Double Down (x2)[/b], [b]Freeze[/b], [b]Gift[/b], [b]Wild Chain[/b] and [b]Wild Mirror[/b]. Hover any card for its effect. Tougher opponents use them too!
+[b][color=#f5c542]Trick cards[/color][/b]  [b]Discard All[/b], [b]Wild Swap[/b], dual-colour numbers, [b]Double Down (x2)[/b], [b]Freeze[/b], [b]Gift[/b], [b]Wild Chain[/b] and [b]Wild Mirror[/b]. Hover over (or press and hold) any card for its effect. Tougher opponents use them too!
 [b][color=#f5c542]Bust![/color][/b]  Anyone holding 25 cards loses the battle on the spot. After 200 turns, the smaller hand wins.
 [b][color=#f5c542]Decks[/color][/b]  Win a run to unlock the next starting deck."""
 	col.add_child(rt)
@@ -112,4 +128,5 @@ func _show_how_to_play() -> void:
 	close.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	close.pressed.connect(layer.queue_free)
 	col.add_child(close)
+	_modal = layer
 	add_child(layer)
